@@ -1,0 +1,67 @@
+##
+## Network-related features.
+##
+## dragonshark-network-list-ipv4-interfaces
+## dragonshark-network-list-wlan-interfaces
+## dragonshark-network-list-wireless-networks
+## dragonshark-network-connect
+## dragonshark-network-disconnect
+
+# Enumerates all the IPv4 addresses in the machine in the following format:
+#
+# {ip},{type in [lan,loopback,unknown]},{wireless in [yes,no]}
+#
+# Line by line each one is presented and we'll be able to tell which are the
+# total addresses and which of them are wireless. Features out of this one:
+#
+# 1. Enumerate IP addresses.
+# 2. Enumerate the WLAN IP addresses.
+# 3. Is there any WLAN IP address?
+function dragonshark-network-list-ipv4-interfaces() {
+ip -o -4 addr show | while read -r num dev fam addr rest; do
+    ip_addr=$(echo $addr | cut -d/ -f1)
+    if [ -d /sys/class/net/$dev/wireless ]; then
+        echo "$ip_addr,lan,yes"
+    elif [ -d /sys/class/net/$dev/device ]; then
+        echo "$ip_addr,lan,no"
+    elif [ "$dev" == "lo" ]; then
+        echo "$ip_addr,loopback,no"
+    else
+        echo "$ip_addr,unknown,no"
+    fi
+done
+}
+
+# Enumerate WLAN interfaces (their names only).
+function dragonshark-network-list-wlan-interfaces() {
+for iface in /sys/class/net/*/wireless; do
+    if [ -d "$iface" ]; then
+        basename "$(dirname "$iface")"
+    fi
+done
+}
+
+# Lists all the (publicly listed) wireless networks, each in this format:
+#
+# {active in [,*]}:{ssid}:{signal in [1..100]}
+#
+# This presumes only one wireless network adapter is present. Line by line
+# they're presented. Features ouf of this one:
+#
+# 1. Enumerate all the SSIDs and the signal.
+# 2. Which network I'm connected to?
+function dragonshark-network-list-wireless-networks() {
+# Consider whether SECURITY should be added as field or not.
+nmcli -t -f ACTIVE,SSID,SIGNAL dev wifi list
+}
+
+# Connects to a given network (SSID) $1 with password $2 in interface $3.
+# The interface is something like "wlo1" or stuff like that.
+function dragonshark-network-connect() {
+nmcli dev wifi connect "$1" password "$2" ifname "$3"
+}
+
+# Disconnects the interface $1. The interface is something like "wlo1".
+function dragonshark-network-disconnect() {
+nmcli device disconnect $1
+}
