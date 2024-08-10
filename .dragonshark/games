@@ -46,7 +46,14 @@ function dragonshark-games-set-roms-dir() {
 
 # Gets the new ROMs directory.
 function dragonshark-games-get-roms-dir() {
-    cat ~/.emulationstation/es_systems.cfg | grep -Po "<path>\K.*(?=</path>)" | head -n 1 | grep -Po ".*(?=</path>)"
+    DIR=$(cat ~/.emulationstation/es_systems.cfg | grep -Po "<path>\K.*(?=</path>)" | head -n 1)
+    if [[ ! $? ]]
+    then
+        echo "Could not retrieve the current ROMs directory" 1>&2
+        return 1
+    fi
+
+    echo $(dirname $DIR)
 }
 
 # Makes a backup of the save states.
