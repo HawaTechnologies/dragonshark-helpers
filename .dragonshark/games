@@ -4,6 +4,7 @@
 ## dragonshark-games-enumerate-external-device-dirs
 ## dragonshark-games-set-roms-dir
 ## dragonshark-games-get-roms-dir
+## dragonshark-games-saves-setup
 ## dragonshark-games-saves-backup
 ## dragonshark-games-saves-restore
 
@@ -64,6 +65,7 @@ function dragonshark-games-saves-backup() {
         return 2
     fi
 
+    dragonshark-games-saves-setup
     rm "$1/backup.zip" > /dev/null 2> /dev/null
     cd /mnt/SAVES && zip -r "$1/backup.zip" ./*
     return $?
@@ -72,4 +74,28 @@ function dragonshark-games-saves-backup() {
 # Applies a backup of the save states.
 function dragonshark-games-saves-restore() {
     unzip -o "$1/backup.zip" -d /mnt/SAVES
+}
+
+# Sets up the directories in save.
+function dragonshark-games-saves-setup() {
+    mkdir -p /mnt/SAVES/atari2600
+    mkdir -p /mnt/SAVES/atari5200
+    mkdir -p /mnt/SAVES/atari7800
+    mkdir -p /mnt/SAVES/atarijaguar
+    mkdir -p /mnt/SAVES/atarilynx
+    mkdir -p /mnt/SAVES/nds
+    mkdir -p /mnt/SAVES/dosbox
+    mkdir -p /mnt/SAVES/gamegear
+    mkdir -p /mnt/SAVES/gba
+    mkdir -p /mnt/SAVES/gbcolor
+    mkdir -p /mnt/SAVES/genesis
+    mkdir -p /mnt/SAVES/mame
+    mkdir -p /mnt/SAVES/mastersystem
+    mkdir -p /mnt/SAVES/n64
+    mkdir -p /mnt/SAVES/neogeocd
+    mkdir -p /mnt/SAVES/neogeopocket
+    mkdir -p /mnt/SAVES/nes
+    mkdir -p /mnt/SAVES/ps1
+    mkdir -p /mnt/SAVES/segacd
+    mkdir -p /mnt/SAVES/snes
 }
