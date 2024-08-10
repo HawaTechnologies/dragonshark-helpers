@@ -11,6 +11,11 @@ function dragonshark-enumerate-media-dirs() {
     lsblk -o MOUNTPOINT | grep "/media/$USER"
 }
 
+# Gets the root directory of the media device's directory.
+function __dragonshark-get-root() {
+    echo "$1" | grep -Po "^/media/[^/]+/[^/]+"
+}
+
 # Sets the new ROMs directory. The directory must exist and also
 # belong to /media/$USER.
 function dragonshark-set-roms-dir() {
@@ -20,17 +25,24 @@ function dragonshark-set-roms-dir() {
         return 2
     fi
 
-    dragonshark-enumerate-media-dirs | grep "$1"
+    DEV_DIR=$(__dragonshark-get-root "$1")
     if [[ ! $? ]]
     then
         echo "The given roms dir is not an external media directory" 1>&2
         return 1
     fi
 
-    sed 's|%ROMS%|$1|g' $HOME/.emulationstation/es_systems.template.cfg > $HOME/.emulationstation/es_systems.cfg
+    dragonshark-enumerate-media-dirs | grep "$DEV_DIR" > /dev/null
+    if [[ ! $? ]]
+    then
+        echo "The given roms dir is not an external media directory" 1>&2
+        return 1
+    fi
+
+    sed "s|%ROMS%|$1|g" $HOME/.emulationstation/es_systems.template.cfg > $HOME/.emulationstation/es_systems.cfg
 }
 
 # Gets the new ROMs directory.
 function dragonshark-get-roms-dir() {
-    cat ~/.emulationstation/es_systems.cfg | grep -Po "<path>\K.*(?=</path>)" | head -n 1 | grep -Po "/media/pi/[^/]+"
+    cat ~/.emulationstation/es_systems.cfg | grep -Po "<path>\K.*(?=</path>)" | head -n 1 | grep -Po "/media/$USER/[^/]+"
 }
