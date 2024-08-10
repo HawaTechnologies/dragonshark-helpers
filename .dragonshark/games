@@ -1,38 +1,38 @@
 ##
 ## RetroArch-related features.
 ##
-## dragonshark-enumerate-external-device-dirs
-## dragonshark-set-roms-dir
-## dragonshark-get-roms-dir
+## dragonshark-games-enumerate-external-device-dirs
+## dragonshark-games-set-roms-dir
+## dragonshark-games-get-roms-dir
 
 # Enumerates the media directories belonging to mounted devices.
 # The enumerated directories belong to /media/$USER.
-function dragonshark-enumerate-media-dirs() {
+function dragonshark-games-enumerate-media-dirs() {
     lsblk -o MOUNTPOINT | grep "/media/$USER"
 }
 
 # Gets the root directory of the media device's directory.
-function __dragonshark-get-root() {
+function __dragonshark-games-get-root() {
     echo "$1" | grep -Po "^/media/[^/]+/[^/]+"
 }
 
 # Sets the new ROMs directory. The directory must exist and also
 # belong to /media/$USER.
-function dragonshark-set-roms-dir() {
+function dragonshark-games-set-roms-dir() {
     if [[ ! -d "$1" ]]
     then
         echo "The given roms dir does not exist" 1>&2
         return 2
     fi
 
-    DEV_DIR=$(__dragonshark-get-root "$1")
+    DEV_DIR=$(__dragonshark-games-get-root "$1")
     if [[ ! $? ]]
     then
         echo "The given roms dir is not an external media directory" 1>&2
         return 1
     fi
 
-    dragonshark-enumerate-media-dirs | grep "$DEV_DIR" > /dev/null
+    dragonshark-games-enumerate-media-dirs | grep "$DEV_DIR" > /dev/null
     if [[ ! $? ]]
     then
         echo "The given roms dir is not an external media directory" 1>&2
@@ -43,6 +43,6 @@ function dragonshark-set-roms-dir() {
 }
 
 # Gets the new ROMs directory.
-function dragonshark-get-roms-dir() {
+function dragonshark-games-get-roms-dir() {
     cat ~/.emulationstation/es_systems.cfg | grep -Po "<path>\K.*(?=</path>)" | head -n 1 | grep -Po "/media/$USER/[^/]+"
 }
