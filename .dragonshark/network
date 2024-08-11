@@ -51,7 +51,7 @@ function dragonshark-network-list-wlan-interfaces() {
 # 1. Enumerate all the SSIDs and the signal.
 # 2. Which network I'm connected to?
 function dragonshark-network-list-wireless-networks() {
-# Consider whether SECURITY should be added as field or not.
+    # Consider whether SECURITY should be added as field or not.
     nmcli -t -f ACTIVE,SSID,SIGNAL dev wifi list
 }
 
