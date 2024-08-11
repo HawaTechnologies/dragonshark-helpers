@@ -98,4 +98,5 @@ function dragonshark-games-saves-setup() {
     mkdir -p /mnt/SAVES/ps1
     mkdir -p /mnt/SAVES/segacd
     mkdir -p /mnt/SAVES/snes
+    mkdir -p /mnt/SAVES/dragonshark
 }
