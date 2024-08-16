@@ -1,0 +1,8 @@
+#!/bin/bash
+
+# Enumerate WLAN interfaces (their names only).
+for iface in /sys/class/net/*/wireless; do
+    if [ -d "$iface" ]; then
+        basename "$(dirname "$iface")"
+    fi
+done

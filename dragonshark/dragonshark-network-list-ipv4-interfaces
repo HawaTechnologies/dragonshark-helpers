@@ -1,0 +1,24 @@
+#!/bin/bash
+
+# Enumerates all the IPv4 addresses in the machine in the following format:
+#
+# {ip},{type in [lan,loopback,unknown]},{wireless in [yes,no]}
+#
+# Line by line each one is presented and we'll be able to tell which are the
+# total addresses and which of them are wireless. Features out of this one:
+#
+# 1. Enumerate IP addresses.
+# 2. Enumerate the WLAN IP addresses.
+# 3. Is there any WLAN IP address?
+ip -o -4 addr show | while read -r num dev fam addr rest; do
+    ip_addr=$(echo $addr | cut -d/ -f1)
+    if [ -d /sys/class/net/$dev/wireless ]; then
+        echo "$ip_addr,lan,yes"
+    elif [ -d /sys/class/net/$dev/device ]; then
+        echo "$ip_addr,lan,no"
+    elif [ "$dev" == "lo" ]; then
+        echo "$ip_addr,loopback,no"
+    else
+        echo "$ip_addr,unknown,no"
+    fi
+done

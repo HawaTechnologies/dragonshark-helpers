@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# Lists all the (publicly listed) wireless networks, each in this format:
+#
+# {active in [,*]}:{ssid}:{signal in [1..100]}
+#
+# This presumes only one wireless network adapter is present. Line by line
+# they're presented. Features ouf of this one:
+#
+# 1. Enumerate all the SSIDs and the signal.
+# 2. Which network I'm connected to?
+# Consider whether SECURITY should be added as field or not.
+nmcli -t -f ACTIVE,SSID,SIGNAL dev wifi list

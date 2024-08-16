@@ -1,0 +1,4 @@
+#!/bin/bash
+
+# Disconnects the interface $1. The interface is something like "wlo1".
+nmcli device disconnect $1

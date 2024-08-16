@@ -1,0 +1,5 @@
+#!/bin/bash
+
+# Connects to a given network (SSID) $1 with password $2 in interface $3.
+# The interface is something like "wlo1" or stuff like that.
+nmcli dev wifi connect "$1" password "$2" ifname "$3"
