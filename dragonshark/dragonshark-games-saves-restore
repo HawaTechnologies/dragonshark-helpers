@@ -1,0 +1,4 @@
+#!/bin/bash
+
+# Applies a backup of the save states.
+unzip -o "$1/backup.zip" -d /mnt/SAVES
