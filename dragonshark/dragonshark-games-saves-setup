@@ -1,0 +1,24 @@
+#!/bin/bash
+
+# Sets up the directories in save.
+mkdir -p /mnt/SAVES/atari2600
+mkdir -p /mnt/SAVES/atari5200
+mkdir -p /mnt/SAVES/atari7800
+mkdir -p /mnt/SAVES/atarijaguar
+mkdir -p /mnt/SAVES/atarilynx
+mkdir -p /mnt/SAVES/nds
+mkdir -p /mnt/SAVES/dosbox
+mkdir -p /mnt/SAVES/gamegear
+mkdir -p /mnt/SAVES/gba
+mkdir -p /mnt/SAVES/gbcolor
+mkdir -p /mnt/SAVES/genesis
+mkdir -p /mnt/SAVES/mame
+mkdir -p /mnt/SAVES/mastersystem
+mkdir -p /mnt/SAVES/n64
+mkdir -p /mnt/SAVES/neogeocd
+mkdir -p /mnt/SAVES/neogeopocket
+mkdir -p /mnt/SAVES/nes
+mkdir -p /mnt/SAVES/ps1
+mkdir -p /mnt/SAVES/segacd
+mkdir -p /mnt/SAVES/snes
+mkdir -p /mnt/SAVES/dragonshark
