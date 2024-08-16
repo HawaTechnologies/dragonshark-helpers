@@ -1,0 +1,5 @@
+#!/bin/bash
+
+# Enumerates the media directories belonging to mounted devices.
+# The enumerated directories belong to /media/$USER.
+lsblk -o MOUNTPOINT | grep "/media/$USER"
