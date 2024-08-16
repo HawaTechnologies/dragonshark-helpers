@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# Gets the new ROMs directory.
+DIR=$(cat ~/.emulationstation/es_systems.cfg | grep -Po "<path>\K.*(?=</path>)" | head -n 1)
+if [[ $? -ne 0 ]]
+then
+    echo "Could not retrieve the current ROMs directory" 1>&2
+    return 1
+fi
+echo $(dirname $DIR)
