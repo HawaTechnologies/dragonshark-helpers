@@ -1,0 +1,13 @@
+#!/bin/bash
+
+# Makes a backup of the save states.
+if [[ ! -d "$1" ]]
+then
+    echo "Invalid backup directory: $1" 1>&2
+    return 2
+fi
+
+$(dirname "$0")/dragonshark-games-saves-setup
+rm "$1/backup.zip" > /dev/null 2> /dev/null
+cd /mnt/SAVES && zip -r "$1/backup.zip" ./*
+return $?
