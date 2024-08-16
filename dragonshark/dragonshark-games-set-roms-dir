@@ -1,0 +1,30 @@
+#!/bin/bash
+
+# Gets the root directory of the media device's directory.
+function __dragonshark-games-get-root() {
+    echo "$1" | grep -Po "^/media/[^/]+/[^/]+"
+}
+
+# Sets the new ROMs directory. The directory must exist and also
+# belong to /media/$USER.
+if [[ ! -d "$1" ]]
+then
+    echo "The given roms dir does not exist" 1>&2
+    return 2
+fi
+
+DEV_DIR=$(__dragonshark-games-get-root "$1")
+if [[ $? -ne 0 ]]
+then
+    echo "The given roms dir is not an external media directory" 1>&2
+    return 1
+fi
+
+$(dirname "$0")/dragonshark-games-enumerate-external-device-dirs | grep "$DEV_DIR" > /dev/null 2> /dev/null
+if [[ $? -ne 0 ]]
+then
+    echo "The given roms dir is not an external media directory" 1>&2
+    return 1
+fi
+
+sed "s|%ROMS%|$1|g" $HOME/.emulationstation/es_systems.template.cfg > $HOME/.emulationstation/es_systems.cfg
