@@ -1,11 +1,8 @@
 # dragonshark-helpers
-A list of helper commands to be installed in the ~/.bashrc of the console. The idea is for the following elements to be installed into /home/pi as-is:
+A list of helper commands. The directory `dragonshark` with all its scripts must be put inside `/opt/Hawa`,
+and then symlinked into `/usr/local/bin`.
 
-1. `.dragonshark-bashrc` file.
-2. `.dragonshark/` directory.
+Two groups of helper commands are given:
 
-Then, in the ~/.bashrc file, add the following entries:
-
-```
-source .dragonshark-bashrc
-```
+1. Network-related commands: Those related to enumerating IP addresses, wireless interfaces, and connecting/disconnecting.
+2. Games-related commands: Those related to directories (e.g. saves and games/roms).
