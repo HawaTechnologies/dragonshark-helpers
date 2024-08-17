@@ -5,6 +5,6 @@ DIR=$(cat ~/.emulationstation/es_systems.cfg | grep -Po "<path>\K.*(?=</path>)" 
 if [[ $? -ne 0 ]]
 then
     echo "Could not retrieve the current ROMs directory" 1>&2
-    return 1
+    exit 1
 fi
 echo $(dirname $DIR)
