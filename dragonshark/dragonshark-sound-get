@@ -1,0 +1,4 @@
+#!/bin/bash
+
+# Gets the Master volume
+amixer get Master | grep -oP '\[\d+%\]' | head -1 | tr -d '[]%'

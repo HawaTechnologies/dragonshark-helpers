@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# Sets the Master volume
+if [[ "$2" =~ ^[0-9]+$ ]] && [ "$2" -ge 0 ] && [ "$2" -le 100 ]; then
+    amixer -D $DEVICE set Master "$2"% > /dev/null
+    echo "Volume set to $2%"
+else
+    echo "Invalid volume value. Please specify a number between 0 and 100." 1>&2
+    exit 1
+fi
