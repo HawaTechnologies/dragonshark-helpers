@@ -23,7 +23,9 @@ These commands are meant to be used from the Dragonshark UI apps or indirectly a
 
 They come like this:
 
-### dragonshark-games-enumerate-external-device-dirs
+### Games and Saves
+
+#### dragonshark-games-enumerate-external-device-dirs
 
 Lists the available external storage device directories (USB sticks or Mini SD cards).
 The output is a list (one per line) of allowed directories to store games or data into.
@@ -44,7 +46,7 @@ It returns something like:
 
 where those are the actually per-unit mounted directories, for external storages like USB sticks.
 
-### dragonshark-games-get-roms-dir
+#### dragonshark-games-get-roms-dir
 
 Tells the directory where the games (emulated/ROMs and native/ARM64 ones) are located.
 The output is a single line telling the games' storage directory.
@@ -91,7 +93,7 @@ have the following subdirectories:
 20. `n64` (Nintendo 64).
 21. `dragonshark` (Dragonshark-format Linux ARM64 packed games).
 
-### dragonshark-games-set-roms-dir
+#### dragonshark-games-set-roms-dir
 
 Sets the directory where the games (emulated/ROMs and native/ARM64 ones) will be located.
 
@@ -105,7 +107,7 @@ a `.png` image must exist with its name matching the corresponding ROM's name (w
 extension) of the game it represents. Otherwise, the game will not have a portrait image
 when using EmulationStation.
 
-### dragonshark-games-saves-backup
+#### dragonshark-games-saves-backup
 
 Performs a backup of the current saves, as a ZIP file.
 There's no meaningful output from this command.
@@ -121,7 +123,7 @@ as per setup) as a ZIP file named `backup.zip` into the specified directory. Typ
 directory will be selected from one of the directories returned by running the command
 `dragonshark-games-enumerate-external-device-dirs`.
 
-### dragonshark-games-saves-restore
+#### dragonshark-games-saves-restore
 
 Performs a restore of a saves' backup (a ZIP file named `backup.zip`).
 There's no meaningful output from this command.
@@ -137,7 +139,7 @@ It restores a backup of saves from the specified directory (which must contain a
 `/mnt/SAVES` directory, overwriting any existing save file. *It does not remove previous
 contents, but writes on top*.
 
-### dragonshark-games-saves-setup
+#### dragonshark-games-saves-setup
 
 Ensures that, inside `/mnt/setup`, all the 21 directories will exist to store the saves.
 There's no meaningful output from this command.
@@ -172,3 +174,116 @@ previous 21 names of ROMs directories:
 19. `nds` (Nintendo DS).
 20. `n64` (Nintendo 64).
 21. `dragonshark` (Dragonshark-format Linux ARM64 packed games).
+
+### Network commands
+
+Wi-Fi is supported by this console, although typically via an external dongle.
+
+While emulated games seldom use Wi-Fi, Dragonshark / Native games might make use of it.
+Standard Debian commands apply here.
+
+#### dragonshark-network-list-wlan-interfaces
+
+Lists the available Wi-Fi network interfaces in the console or computer. If it's in
+the console and does not have a Wi-Fi dongle installed, this command will not show
+any network interface. Otherwise, it's typically `wlan0`. In Wi-Fi-enabled devices
+with a modern Ubuntu version, the built-in supported Wi-Fi interface will have the
+name `wlo1` instead.
+
+Run it like this:
+
+```shell
+dragonshark-network-list-wlan-interfaces
+```
+
+It returns, on each line, the name of a supported and available Wi-Fi interface.
+
+#### dragonshark-network-connect
+
+Attempts to connect to a Wi-Fi network.
+
+Run it like this:
+
+```shell
+# An open network.
+dragonshark-network-connect SOME-NETWORK wlan0 
+```
+
+Or perhaps:
+
+```shell
+# A private network.
+dragonshark-network-connect SOME-NETWORK "some-password" wlan0.
+```
+
+The first argument is a network SSID.
+
+The last argument is a network interface (in this case wlan0) and **must** be one
+returned by `dragonshark-network-list-wlan-interfaces`
+
+The middle argument, if provided, is the network's password.
+
+The underlying command being used is `nmcli`.
+
+#### dragonshark-network-disconnect
+
+Attempts to disconnect from the current Wi-Fi network.
+
+Run it like this:
+
+```shell
+dragonshark-network-disconnect wlan0
+```
+
+The interface (in this case wlan0) **must** be one returned by the command
+`dragonshark-network-list-wlan-interfaces`.
+
+#### dragonshark-network-list-wireless-networks
+
+Lists the available public networks, and which one is an active network, if any.
+
+Run it like this:
+
+```shell
+dragonshark-network-list-wireless-networks
+```
+
+It will return a result where each line will have several colon-separated fields, in order:
+
+1. Active field: `no` (not connected) or `yes`. If `yes`, then the console or computer is
+   connected to that network (many rows with `yes`) can exist if there are many Wi-Fi
+   interfaces, and they happen to be connected to some network.
+2. The SSID (public name, say) of the network.
+3. The strength (1-100) of the signal to that network.
+4. The name of the interface (e.g. `wlan0` that detected that network entry).
+5. The security schemes supported by that network. This is a list of codenames separated by a space.
+
+Example output:
+
+```
+no:MY_NETWORK:97:wlan0:WPA1 WPA2
+yes:MY_NETWORK:74:wlan0:WPA1 WPA2
+```
+
+#### dragonshark-network-list-ipv4-interfaces
+
+This command is used to tell which IPv4 interfaces are available in this computer. This
+typically serves the purpose of telling, in the same Wi-Fi network, what's the IP other
+devices must connect to (e.g. the VirtualPad server UI uses this command as a hint to
+the players to successfully connect client pads from their mobile devices to the console).
+
+Run it like this:
+
+```shell
+dragonshark-network-list-ipv4-interfaces
+```
+
+It will return a result where each line will have several comma-separated fields, in order:
+
+1. The IP address.
+2. Whether it's a `loopback` address, a `lan` (LAN-reachable) address, or an unknown
+   IPv4 address type.
+3. Whether it's a WLAN-reachable address, in particular. In this case, it will be also a
+   `lan` address, but not all the LAN-reachable addresses are WLAN-reachable addresses,
+   because computers and consoles also support wired LAN adapters, which do not serve any
+   purpose to services like VirtualPad server.
