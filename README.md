@@ -2,10 +2,11 @@
 A list of helper commands. The directory `dragonshark` with all its scripts must be put inside `/opt/Hawa`,
 and then symlinked into `/usr/local/bin`.
 
-Two groups of helper commands are given:
+Different groups of helper commands are given:
 
 1. Network-related commands: Those related to enumerating IP addresses, wireless interfaces, and connecting/disconnecting.
 2. Games-related commands: Those related to directories (e.g. saves and games/roms).
+3. Sound-related commands: Those related to sound (set and get the volume).
 
 Stepping on this directory, the command to install these commands is:
 
