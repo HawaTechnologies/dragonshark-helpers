@@ -6,7 +6,7 @@ Different groups of helper commands are given:
 
 1. Network-related commands: Those related to enumerating IP addresses, wireless interfaces, and connecting/disconnecting.
 2. Games-related commands: Those related to directories (e.g. saves and games/roms).
-3. Sound-related commands: Those related to sound (set and get the volume).
+3. Experience-related commands: Those related to stuff like sound (set and get the volume).
 
 ## Installation
 
@@ -287,3 +287,34 @@ It will return a result where each line will have several comma-separated fields
    `lan` address, but not all the LAN-reachable addresses are WLAN-reachable addresses,
    because computers and consoles also support wired LAN adapters, which do not serve any
    purpose to services like VirtualPad server.
+
+### Experience-related commands
+
+Miscellaneous commands are included here (e.g. to manage the system's sound).
+
+For the sound, these commands work if ALSA Mixer is available and also an entry named
+`Master` is supported (which is true in DragonShark consoles, but not necessarily true
+for regular Ubuntu systems).
+
+#### dragonshark-sound-set-volume
+
+Sets the Master volume. This command does not return a meaningful output.
+
+Run it like this:
+
+```shell
+# Set a value 0 to 100 here.
+dragonshark-sound-set-volume 50
+```
+
+#### dragonshark-sound-get-volume
+
+Retrieves the Master volume.
+
+Run it like this:
+
+```shell
+dragonshark-sound-get-volume
+```
+
+The result is a single number 0 to 100.
