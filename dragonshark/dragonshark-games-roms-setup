@@ -1,0 +1,30 @@
+#!/bin/bash
+
+if [ $# -eq 0 ];
+then
+    echo "Missing argument: {directory}" 2>&1
+    exit 1
+fi
+
+# Sets up the directories in save.
+mkdir -p $1/atari2600
+mkdir -p $1/atari5200
+mkdir -p $1/atari7800
+mkdir -p $1/atarijaguar
+mkdir -p $1/atarilynx
+mkdir -p $1/nds
+mkdir -p $1/dosbox
+mkdir -p $1/gamegear
+mkdir -p $1/gba
+mkdir -p $1/gbcolor
+mkdir -p $1/genesis
+mkdir -p $1/mame
+mkdir -p $1/mastersystem
+mkdir -p $1/n64
+mkdir -p $1/neogeocd
+mkdir -p $1/neogeopocket
+mkdir -p $1/nes
+mkdir -p $1/ps1
+mkdir -p $1/segacd
+mkdir -p $1/snes
+mkdir -p $1/dragonshark
