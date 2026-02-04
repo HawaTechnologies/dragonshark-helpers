@@ -46,6 +46,20 @@ It returns something like:
 
 where those are the actually per-unit mounted directories, for external storages like USB sticks.
 
+#### dragonshark-games-roms-setup
+
+Ensures that, inside a chosen directory, all the 21 directories will exist to store the ROMs.
+There's no meaningful output from this command.
+
+Run it like this:
+
+```shell
+dragonshark-games-roms-setup /media/pi/SOMETHING-HERE
+```
+
+It creates 21 special directories inside that directory. Check the following command to understand
+what are those directories' names.
+
 #### dragonshark-games-get-roms-dir
 
 Tells the directory where the games (emulated/ROMs and native/ARM64 ones) are located.
