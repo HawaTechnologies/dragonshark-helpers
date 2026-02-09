@@ -310,6 +310,33 @@ For the sound, these commands work if ALSA Mixer is available and also an entry 
 `Master` is supported (which is true in DragonShark consoles, but not necessarily true
 for regular Ubuntu systems).
 
+#### dragonshark-start
+
+Starts the DragonShark experience on the device, with an LXDE profile.
+
+Run it like this:
+
+```shell
+# Thees two are equivalent:
+dragonshark-start
+dragonshark-start LDXE-pi
+# General case:
+dragonshark-start SOME-LXDE-PROFILE
+```
+
+If the ~/.run-in-debug-mode file is present (it doesn't matter what it contains), then
+it will be deleted and the startup will be regular (for a linux user: desktop, background
+and all the other elements).
+
+Otherwise, the regular experience will occur: No desktop, no background, no applications
+bar and only the trigger of `dragonshark-ui` app, full-screen.
+
+In order to start the device in debug mode, run this command in a shell:
+
+```shell
+touch ~/.run-in-debug-mode && reboot
+```
+
 #### dragonshark-sound-set-volume
 
 Sets the Master volume. This command does not return a meaningful output.
