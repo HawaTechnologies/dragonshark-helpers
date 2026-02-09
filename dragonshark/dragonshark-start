@@ -1,0 +1,25 @@
+#!/bin/bash
+
+# Starts the desktop in one of two modes: Debug mode or regular.
+# Debug mode is standard for a linux user. Regular mode starts
+# dragonshark-ui and kills the desktop appliances.
+#
+# It takes an optional parameter which is a desktop profile.
+# For Raspberry OS, the default user is `pi` and the default
+# profile is LXDE-pi, given by default in this script.
+FLAG="$HOME/.run-in-debug-mode"
+PROFILE="${1:-LXDE-pi}"
+chmod ugo+rx /media/pi
+if [ -f "$FLAG" ];
+then
+  # Debug mode: remove flag so next restart is normal
+  rm "$FLAG"
+  lxpanel --profile "$PROFILE" &
+  pcmanfm --desktop --profile "$PROFILE" &
+  # Wait to keep script alive
+  wait
+else
+  # Normal mode: kill desktop and launch UI
+  killall lxpanel 2>/dev/null
+  killall pcmanfm 2>/dev/null
+fi
