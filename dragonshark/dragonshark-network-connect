@@ -3,7 +3,7 @@
 # Connects to a given network (SSID) $1 with password $2 in interface $3.
 # The interface is something like "wlo1" or stuff like that. If the password
 # is empty, the password argument will be united.
-nmcli connection delete LEIVA1
+nmcli connection delete "$1"
 if [ -z "$2" ]; then
     # No password provided, connect to the open network
     nmcli dev wifi connect "$1" ifname "$3"
