@@ -3,11 +3,15 @@
 # Connects to a given network (SSID) $1 with password $2 in interface $3.
 # The interface is something like "wlo1" or stuff like that. If the password
 # is empty, the password argument will be united.
-nmcli connection delete "$1"
+#
+# `sudo` is typically not needed, but for the configuration present in the
+# console, it helps to avoid showing pop-ups when an error occur, leaving
+# everything to a hard abort instead.
+sudo nmcli connection delete "$1"
 if [ -z "$2" ]; then
     # No password provided, connect to the open network
-    nmcli dev wifi connect "$1" ifname "$3"
+    sudo nmcli dev wifi connect "$1" ifname "$3"
 else
     # Password provided, connect with the password
-    nmcli dev wifi connect "$1" password "$2" ifname "$3"
+    sudo nmcli dev wifi connect "$1" password "$2" ifname "$3"
 fi
