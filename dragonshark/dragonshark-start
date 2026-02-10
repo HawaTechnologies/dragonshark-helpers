@@ -9,18 +9,15 @@
 # profile is LXDE-pi, given by default in this script.
 FLAG="$HOME/.run-in-debug-mode"
 PROFILE="${1:-LXDE-pi}"
-chmod ugo+rx /media/pi
 if [ -f "$FLAG" ];
 then
   # Debug mode: remove flag so next restart is normal
   rm "$FLAG"
-  lxpanel --profile "$PROFILE" &
-  pcmanfm --desktop --profile "$PROFILE" &
   # Wait to keep script alive
   wait
 else
   # Normal mode: kill desktop and launch UI
-  killall lxpanel 2>/dev/null
-  killall pcmanfm 2>/dev/null
+  killall lxpanel 2>/dev/null || true
+  pkill -u "$USER" -f 'pcmanfm --desktop' 2>/dev/null || true
   dragonshark-ui
 fi
