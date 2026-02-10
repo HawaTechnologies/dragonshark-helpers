@@ -22,4 +22,5 @@ else
   # Normal mode: kill desktop and launch UI
   killall lxpanel 2>/dev/null
   killall pcmanfm 2>/dev/null
+  dragonshark-ui
 fi
