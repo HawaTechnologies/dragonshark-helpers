@@ -13,11 +13,13 @@ if [ -f "$FLAG" ];
 then
   # Debug mode: remove flag so next restart is normal
   rm "$FLAG"
+  killall udiskie 2>/dev/null || true
   # Wait to keep script alive
   wait
 else
   # Normal mode: kill desktop and launch UI
   killall lxpanel 2>/dev/null || true
-  pkill -u "$USER" -f 'pcmanfm --desktop' 2>/dev/null || true
+  killall lxpanel 2>/dev/null || true
+  # Or: pkill -u "$USER" -f 'pcmanfm' 2>/dev/null || true
   dragonshark-ui
 fi
