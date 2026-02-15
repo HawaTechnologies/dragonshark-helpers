@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
-source /usr/local/lib/dragonshark-bluetooth.sh
+source /usr/local/lib/dragonshark-bluetooth-utils
 
 # 1. First, prepare the bluetooth drivers.
 ensure_bluetooth_up
