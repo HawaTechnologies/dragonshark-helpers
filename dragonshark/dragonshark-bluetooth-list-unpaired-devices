@@ -4,7 +4,7 @@ source /usr/local/lib/dragonshark-bluetooth-utils
 
 # 1. First, prepare the bluetooth drivers and scan the devices.
 ensure_bluetooth_up
-scan_for_devices
+scan_for_devices ${1:-6}
 
 # 2. Collect all known devices and paired devices, then subtract.
 #    with this,

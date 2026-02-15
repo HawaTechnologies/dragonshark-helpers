@@ -61,7 +61,8 @@ resolve_device_to_mac() {
       name="";
       for(i=3;i<=NF;i++){ name = name (i==3?"":" ") $i }
       print mac "\t" name
-    }' | grep -i -- "$q" || true)"
+    }
+  ' | grep -i -- "$q" || true)"
 
   local count
   count="$(printf "%s\n" "$matches" | sed '/^\s*$/d' | wc -l | tr -d ' ')"
