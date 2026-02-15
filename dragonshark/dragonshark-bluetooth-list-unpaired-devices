@@ -18,7 +18,7 @@ for mac in "${all_macs[@]}"; do
     continue
   fi
   # Name lookup (best-effort)
-  name="$(btctl devices | awk -v m="$mac" '$1=="Device" && $2==m { $1=""; $2=""; sub(/^  /,""); print; exit }')"
+  name="$(bluetoothctl devices | awk -v m="$mac" '$1=="Device" && $2==m { $1=""; $2=""; sub(/^  /,""); print; exit }')"
   printf "%s\t%s\n" "$mac" "${name:-}"
 done
 
