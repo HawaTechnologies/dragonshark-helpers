@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+set -euo pipefail
+source /usr/local/lib/dragonshark-bluetooth-utils
+
+# Args: <device name or mac>
+
+# 1. First, prepare the bluetooth drivers.
+ensure_bluetooth_up
+
+# 2. Get the chosen device's mac. A failure
+#    here results in a failure of this command.
+mac="$(resolve_device_to_mac "${1:-}")"
+
+# 3. Pair, trust and connect the device.
+bluetoothctl pair "$mac"
+bluetoothctl trust "$mac"
+bluetoothctl connect "$mac"
+echo "paired successfully: $mac"
