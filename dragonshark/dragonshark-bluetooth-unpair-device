@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+set -euo pipefail
+source /usr/local/lib/dragonshark-bluetooth-utils
+
+# Args: <device name or mac>
+
+ensure_bluetooth_up
+
+mac="$(resolve_device_to_mac "${1:-}")"
+
+# Remove pairing (unpair)
+bluetoothctl remove "$mac"
+echo "unpaired: $mac"
+
+# The result is only the code. No stdout is meaningful.

@@ -16,3 +16,5 @@ bluetoothctl pair "$mac"
 bluetoothctl trust "$mac"
 bluetoothctl connect "$mac"
 echo "paired successfully: $mac"
+
+# The result is only the code. No stdout is meaningful.
