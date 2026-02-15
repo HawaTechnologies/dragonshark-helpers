@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+set -euo pipefail
+source /usr/local/lib/dragonshark-bluetooth-utils
+
+# 1. First, list the devices that can be paired.
+ensure_bluetooth_up
+scan_for_devices
+
+# 2. Collect all known devices and paired devices, then subtract.
+#    with this,
+mapfile -t all_macs < <(bluetoothctl devices | awk '$1=="Device"{print $2}' | sort -u)
+mapfile -t paired_macs < <(bluetoothctl paired-devices | awk '$1=="Device"{print $2}' | sort -u)
+
+# 3. Iterate over each entry from all_macs, but filter out those
+#    already paired.
+for mac in "${all_macs[@]}"; do
+  if printf "%s\n" "${paired_macs[@]}" | grep -qx "$mac"; then
+    continue
+  fi
+  # Name lookup (best-effort)
+  name="$(btctl devices | awk -v m="$mac" '$1=="Device" && $2==m { $1=""; $2=""; sub(/^  /,""); print; exit }')"
+  printf "%s\t%s\n" "$mac" "${name:-}"
+done
+
+# The result goes via stdout. Each entry is: "<mac> <name>",
+# considering the name has no spaces. It serves to be parsed
+# by a tools breaking by spaces and having two entries.
