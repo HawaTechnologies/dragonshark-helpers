@@ -1,0 +1,83 @@
+#!/usr/bin/env bash
+# This file is meant to be `source`d from the other dragonshark-bluetooth-* files,
+# since most of the specific commands make use of these utilities.
+
+# 1. Set the auto-failure conditions for the scripts.
+set -euo pipefail
+
+# 2. Utility to ensure the bluetooth service is always up.
+ensure_bluetooth_up() {
+  # Best-effort; doesn't fail if systemd isn't present.
+  if command -v systemctl >/dev/null 2>&1; then
+    systemctl is-active --quiet bluetooth || sudo systemctl start bluetooth || true
+  fi
+  if command -v rfkill >/dev/null 2>&1; then
+    rfkill unblock bluetooth || true
+  fi
+}
+
+# 3. Utility to tell whether a given string $1 is a MAC or not.
+is_mac() {
+  [[ "${1:-}" =~ ^([0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}$ ]]
+}
+
+# 4. Utility to scan for devices. It waits some time and does not
+#    return the list of devices here, but prepares them to be
+#    retrieved later.
+scan_for_devices() {
+  bluetoothctl scan on >/dev/null 2>&1 || true
+  sleep "${1:-6}"
+  bluetoothctl scan off >/dev/null 2>&1 || true
+}
+
+# 5. Utility to specify a bluetooth device and obtain its MAC.
+#    Device is mandatory, or it's an error.
+#    If the device is already a mac, return it.
+#    Otherwise, scan for devices. If no entries (or multiple
+#    entries) exist for the chosen name, then return an error.
+#    Otherwise, return its MAC.
+resolve_device_to_mac() {
+  local q="${1:-}"
+  if [[ -z "$q" ]]; then
+    echo "error: device argument is required" >&2
+    return 2
+  fi
+
+  if is_mac "$q"; then
+    echo "$q"
+    return 0
+  fi
+
+  scan_for_devices
+
+  # bluetoothctl devices output format:
+  #   Device AA:BB:CC:DD:EE:FF Device Name Here
+  # We'll match on name substring, case-insensitive.
+  local matches
+  matches="$(bluetoothctl devices | awk '
+    BEGIN{IGNORECASE=1}
+    $1=="Device"{
+      mac=$2;
+      name="";
+      for(i=3;i<=NF;i++){ name = name (i==3?"":" ") $i }
+      print mac "\t" name
+    }' | grep -i -- "$q" || true)"
+
+  local count
+  count="$(printf "%s\n" "$matches" | sed '/^\s*$/d' | wc -l | tr -d ' ')"
+
+  if [[ "$count" == "0" ]]; then
+    echo "error: no device name matching: $q" >&2
+    echo "hint: try again with a MAC address, or increase scan time" >&2
+    return 3
+  fi
+
+  if [[ "$count" != "1" ]]; then
+    echo "error: ambiguous device name '$q' matched multiple devices:" >&2
+    printf "%s\n" "$matches" | sed 's/^/  - /' >&2
+    echo "hint: pass the MAC address instead." >&2
+    return 4
+  fi
+
+  printf "%s\n" "$matches" | awk -F'\t' '{print $1}'
+}
