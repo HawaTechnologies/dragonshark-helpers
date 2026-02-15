@@ -2,7 +2,7 @@
 set -euo pipefail
 source /usr/local/lib/dragonshark-bluetooth-utils
 
-# 1. First, list the devices that can be paired.
+# 1. First, prepare the bluetooth drivers and scan the devices.
 ensure_bluetooth_up
 scan_for_devices
 
@@ -22,6 +22,6 @@ for mac in "${all_macs[@]}"; do
   printf "%s\t%s\n" "$mac" "${name:-}"
 done
 
-# The result goes via stdout. Each entry is: "<mac> <name>",
+# The result goes via stdout. Each entry is: "<mac><tab><name>",
 # considering the name has no spaces. It serves to be parsed
-# by a tools breaking by spaces and having two entries.
+# by a tools breaking by tabs and having two entries.
