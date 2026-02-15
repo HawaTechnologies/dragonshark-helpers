@@ -302,6 +302,84 @@ It will return a result where each line will have several comma-separated fields
    because computers and consoles also support wired LAN adapters, which do not serve any
    purpose to services like VirtualPad server.
 
+### Bluetooth commands
+
+Bluetooth is supported in this console, although typically via an external dongle.
+
+This is typically intended for Gamepad bluetooth devices, but this typically works with
+any kind of bluetooth device supported by the console.
+
+#### dragonshark-bluetooth-list-unpaired-devices
+
+Lists the unpaired devices. This is done by scanning nearby the available bluetooth
+devices attempting a scan on their side, and returning them. This scan takes some time
+in seconds, specified by the user.
+
+Run it like this:
+
+```shell
+# These two commands are equivalent
+dragonshark-bluetooth-list-unpaired-devices
+dragonshark-bluetooth-list-unpaired-devices 6
+# Or choose a different amount of seconds.
+dragonshark-bluetooth-list-unpaired-devices 10
+```
+
+It returns a list like this:
+
+```
+01:11:21:31:41:51:61 GamePad
+02:12:22:32:42:52:62 SomethingElse
+...
+```
+
+The device gets paired, trusted and connected.
+
+#### dragonshark-bluetooth-pair-device
+
+Attempts to pair a device. It returns a success or failure status code from the process.
+
+Run it like this:
+
+```shell
+# These two alternatives:
+dragonshark-bluetooth-pair-device 01:11:21:31:41:51
+dragonshark-bluetooth-pair-device GamePad
+```
+
+#### dragonshark-bluetooth-list-paired-devices
+
+Lists the unpaired devices. This is done by just telling the paired
+devices in the console.
+
+Run it like this:
+
+```shell
+dragonshark-bluetooth-list-paired-devices
+```
+
+It returns a list like this:
+
+```
+01:11:21:31:41:51:61 GamePad
+02:12:22:32:42:52:62 SomethingElse
+...
+```
+
+#### dragonshark-bluetooth-unpair-device
+
+Attempts to unpair a device. It returns a success or failure status code from the process.
+
+Run it like this:
+
+```shell
+# These two alternatives:
+dragonshark-bluetooth-unpair-device 01:11:21:31:41:51
+dragonshark-bluetooth-unpair-device GamePad
+```
+
+The device gets unpaired, untrusted and disconnected.
+
 ### Experience-related commands
 
 Miscellaneous commands are included here (e.g. to manage the system's sound).
