@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+set -euo pipefail
+source /usr/local/lib/dragonshark-bluetooth-utils
+
+# Args: <device name or mac> <time>
+# Ensures: trusted=yes and connected=yes for a *paired* device.
+
+ensure_bluetooth_up
+
+scan_secs="${2:-6}"
+mac="$(resolve_device_to_mac "${1:-}" "$scan_secs")"
+
+info_out="$(bluetoothctl info "$mac" 2>&1 || true)"
+info_rc=$?
+if [[ $info_rc -ne 0 ]]; then
+  printf 'bluetoothctl info failed for %s:\n%s\n' "$mac" "$info_out" >&2
+  exit "$info_rc"
+fi
+
+if ! grep -qE 'Paired:\s+yes\b' <<<"$info_out"; then
+  printf 'error: device is not paired: %s\n' "$mac" >&2
+  exit 3
+fi
+
+# 1) Trust it if needed (idempotent; ignore failures like "already trusted")
+if ! grep -qE 'Trusted:\s+yes\b' <<<"$info_out"; then
+  # trust can return nonzero on some setups even when it works; treat as best-effort
+  bluetoothctl trust "$mac" >/dev/null 2>&1 || true
+fi
+
+# Refresh info after trust (optional but keeps logic clean)
+info_out="$(bluetoothctl info "$mac" 2>&1 || true)"
+
+# 2) Connect it if needed (idempotent; ignore failures like "already connected")
+if grep -qE 'Connected:\s+yes\b' <<<"$info_out"; then
+  printf 'ok: already connected: %s\n' "$mac"
+  exit 0
+fi
+
+connect_out="$(bluetoothctl connect "$mac" 2>&1 || true)"
+connect_rc=$?
+
+# If connect failed, it might still be connected (some versions return nonzero spuriously).
+# Verify by re-checking info.
+final_info="$(bluetoothctl info "$mac" 2>&1 || true)"
+if grep -qE 'Connected:\s+yes\b' <<<"$final_info"; then
+  printf 'ok: connected: %s\n' "$mac"
+  exit 0
+fi
+
+# Still not connected: now treat as an actual failure.
+printf 'error: failed to connect %s (rc=%s)\n%s\n' "$mac" "$connect_rc" "$connect_out" >&2
+exit "${connect_rc:-1}"
