@@ -2,35 +2,41 @@
 set -euo pipefail
 source /usr/local/lib/dragonshark-bluetooth-utils
 
-# 1. First, prepare the bluetooth drivers.
 ensure_bluetooth_up
 
-# 2. Retrieve output for paired devices with a version-compatible fallback.
-#    Capture stdout+stderr, detect "invalid/unknown command" and nonzero exit.
-out="$(bluetoothctl paired-devices 2>&1 || true)"
-rc=$?
-
-if [[ $rc -ne 0 ]] || grep -qiE 'invalid command|unknown command' <<<"$out"; then
-  out="$(bluetoothctl devices Paired 2>&1 || true)"
-  rc=$?
+# --- Get paired devices output with fallback (paired-devices vs devices Paired) ---
+paired_out="$(bluetoothctl paired-devices 2>&1 || true)"
+paired_rc=$?
+if [[ $paired_rc -ne 0 ]] || grep -qiE 'invalid command|unknown command' <<<"$paired_out"; then
+  paired_out="$(bluetoothctl devices Paired 2>&1 || true)"
+  paired_rc=$?
+fi
+if [[ $paired_rc -ne 0 ]]; then
+  printf 'bluetoothctl failed (rc=%s):\n%s\n' "$paired_rc" "$paired_out" >&2
+  exit "$paired_rc"
 fi
 
-# If both failed, surface the error (don't silently output empty).
-if [[ $rc -ne 0 ]]; then
-  printf 'bluetoothctl failed (rc=%s):\n%s\n' "$rc" "$out" >&2
-  exit "$rc"
-fi
+# --- Parse paired devices into (mac, name) ---
+# Then query bluetoothctl info <mac> to detect Connected: yes/no
+while IFS=$'\t' read -r mac name; do
+  [[ -n "${mac:-}" ]] || continue
 
-# 3. Format: MAC<TAB>Name
-awk '
-  $1=="Device"{
-    mac=$2;
-    $1=""; $2="";
-    sub(/^  /,"");
-    printf "%s\t%s\n", mac, $0
-  }
-' <<<"$out"
+  info_out="$(bluetoothctl info "$mac" 2>&1 || true)"
+  info_rc=$?
 
-# The result goes via stdout. Each entry is: "<mac><tab><name>",
-# considering the name has no spaces. It serves to be parsed
-# by a tools breaking by tabs and having two entries.
+  # If info fails (rare), treat as not connected but keep listing it.
+  connected="no"
+  if [[ $info_rc -eq 0 ]] && grep -qE 'Connected:\s+yes\b' <<<"$info_out"; then
+    connected="yes"
+  fi
+
+  printf "%s\t%s\t%s\n" "$mac" "$name" "$connected"
+done < <(
+  awk '
+    $1=="Device"{
+      mac=$2;
+      $1=""; $2="";
+      sub(/^  /,"");
+      print mac "\t" $0
+    }' <<<"$paired_out"
+)
