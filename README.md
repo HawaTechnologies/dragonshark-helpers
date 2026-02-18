@@ -318,7 +318,7 @@ in seconds, specified by the user.
 Run it like this:
 
 ```shell
-# These two commands are equivalent
+# These two commands are equivalent.
 dragonshark-bluetooth-list-unpaired-devices
 dragonshark-bluetooth-list-unpaired-devices 6
 # Or choose a different amount of seconds.
@@ -342,9 +342,15 @@ Attempts to pair a device. It returns a success or failure status code from the 
 Run it like this:
 
 ```shell
-# These two alternatives:
+# These two alternatives.
 dragonshark-bluetooth-pair-device 01:11:21:31:41:51
 dragonshark-bluetooth-pair-device GamePad
+# These ones are equivalent to the previous ones.
+dragonshark-bluetooth-pair-device 01:11:21:31:41:51 6
+dragonshark-bluetooth-pair-device GamePad 6
+# Or choose a different amount of seconds.
+dragonshark-bluetooth-pair-device 01:11:21:31:41:51 10
+dragonshark-bluetooth-pair-device GamePad 10
 ```
 
 #### dragonshark-bluetooth-list-paired-devices
@@ -361,8 +367,9 @@ dragonshark-bluetooth-list-paired-devices
 It returns a list like this:
 
 ```
-01:11:21:31:41:51:61 GamePad
-02:12:22:32:42:52:62 SomethingElse
+# The yes and no in third column state whether they're connected or not.
+01:11:21:31:41:51:61 GamePad yes
+02:12:22:32:42:52:62 SomethingElse no
 ...
 ```
 
@@ -373,9 +380,15 @@ Attempts to unpair a device. It returns a success or failure status code from th
 Run it like this:
 
 ```shell
-# These two alternatives:
+# These two alternatives.
 dragonshark-bluetooth-unpair-device 01:11:21:31:41:51
 dragonshark-bluetooth-unpair-device GamePad
+# These ones are equivalent to the previous ones.
+dragonshark-bluetooth-unpair-device 01:11:21:31:41:51 6
+dragonshark-bluetooth-unpair-device GamePad 6
+# Or choose a different amount of seconds.
+dragonshark-bluetooth-unpair-device 01:11:21:31:41:51 10
+dragonshark-bluetooth-unpair-device GamePad 10
 ```
 
 The device gets unpaired, untrusted and disconnected.
