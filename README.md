@@ -393,6 +393,26 @@ dragonshark-bluetooth-unpair-device GamePad 10
 
 The device gets unpaired, untrusted and disconnected.
 
+#### dragonshark-bluetooth-connect-device
+
+Attempts to connect to a paired, but disconnected, device. It returns a success or failure status code from the process.
+
+Run it like this:
+
+```shell
+# These two alternatives.
+dragonshark-bluetooth-connect-device 01:11:21:31:41:51
+dragonshark-bluetooth-connect-device GamePad
+# These ones are equivalent to the previous ones.
+dragonshark-bluetooth-connect-device 01:11:21:31:41:51 6
+dragonshark-bluetooth-connect-device GamePad 6
+# Or choose a different amount of seconds.
+dragonshark-bluetooth-connect-device 01:11:21:31:41:51 10
+dragonshark-bluetooth-connect-device GamePad 10
+```
+
+It's still a success if the device is already trusted and/or already connected.
+
 ### Experience-related commands
 
 Miscellaneous commands are included here (e.g. to manage the system's sound).
