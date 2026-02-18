@@ -5,16 +5,31 @@ source /usr/local/lib/dragonshark-bluetooth-utils
 # 1. First, prepare the bluetooth drivers.
 ensure_bluetooth_up
 
-# 2. List all the paired devices and format them accordingly.
-bluetoothctl paired-devices | awk '
+# 2. Retrieve output for paired devices with a version-compatible fallback.
+#    Capture stdout+stderr, detect "invalid/unknown command" and nonzero exit.
+out="$(bluetoothctl paired-devices 2>&1 || true)"
+rc=$?
+
+if [[ $rc -ne 0 ]] || grep -qiE 'invalid command|unknown command' <<<"$out"; then
+  out="$(bluetoothctl devices Paired 2>&1 || true)"
+  rc=$?
+fi
+
+# If both failed, surface the error (don't silently output empty).
+if [[ $rc -ne 0 ]]; then
+  printf 'bluetoothctl failed (rc=%s):\n%s\n' "$rc" "$out" >&2
+  exit "$rc"
+fi
+
+# 3. Format: MAC<TAB>Name
+awk '
   $1=="Device"{
     mac=$2;
     $1=""; $2="";
     sub(/^  /,"");
-    name=$0;
-    printf "%s\t%s\n", mac, name
+    printf "%s\t%s\n", mac, $0
   }
-' || true
+' <<<"$out"
 
 # The result goes via stdout. Each entry is: "<mac><tab><name>",
 # considering the name has no spaces. It serves to be parsed

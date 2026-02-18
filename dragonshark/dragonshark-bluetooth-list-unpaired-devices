@@ -4,26 +4,70 @@ source /usr/local/lib/dragonshark-bluetooth-utils
 
 # Args: <scan time>
 
-# 1. First, prepare the bluetooth drivers and scan the devices.
 ensure_bluetooth_up
-scan_for_devices ${1:-6}
+scan_for_devices "${1:-6}"
 
-# 2. Collect all known devices and paired devices, then subtract.
-#    with this,
-mapfile -t all_macs < <(bluetoothctl devices | awk '$1=="Device"{print $2}' | sort -u)
-mapfile -t paired_macs < <(bluetoothctl paired-devices | awk '$1=="Device"{print $2}' | sort -u)
+# --- Helper: get paired output with fallback (same logic as paired listing) ---
+paired_out="$(bluetoothctl paired-devices 2>&1 || true)"
+paired_rc=$?
+if [[ $paired_rc -ne 0 ]] || grep -qiE 'invalid command|unknown command' <<<"$paired_out"; then
+  paired_out="$(bluetoothctl devices Paired 2>&1 || true)"
+  paired_rc=$?
+fi
+if [[ $paired_rc -ne 0 ]]; then
+  printf 'bluetoothctl failed (rc=%s):\n%s\n' "$paired_rc" "$paired_out" >&2
+  exit "$paired_rc"
+fi
 
-# 3. Iterate over each entry from all_macs, but filter out those
-#    already paired.
+# --- Snapshot of currently known devices (MAC \t Name) ---
+devices_out="$(bluetoothctl devices 2>&1 || true)"
+devices_rc=$?
+if [[ $devices_rc -ne 0 ]]; then
+  printf 'bluetoothctl devices failed (rc=%s):\n%s\n' "$devices_rc" "$devices_out" >&2
+  exit "$devices_rc"
+fi
+
+# Build a set of all known MACs
+mapfile -t all_macs < <(
+  awk '$1=="Device"{print $2}' <<<"$devices_out" | sort -u
+)
+
+# Build a set of paired MACs (from paired_out)
+mapfile -t paired_macs < <(
+  awk '$1=="Device"{print $2}' <<<"$paired_out" | sort -u
+)
+
+# If there are no paired devices, paired_macs will be empty: that's fine.
+
+# Turn paired_macs into a fast lookup set (associative array)
+declare -A paired_set=()
+for m in "${paired_macs[@]}"; do
+  paired_set["$m"]=1
+done
+
+# Build MAC -> Name lookup table once (best-effort)
+declare -A name_by_mac=()
+while IFS=$'\t' read -r mac name; do
+  [[ -n "${mac:-}" ]] || continue
+  name_by_mac["$mac"]="$name"
+done < <(
+  awk '
+    $1=="Device"{
+      mac=$2;
+      $1=""; $2="";
+      sub(/^  /,"");
+      print mac "\t" $0
+    }' <<<"$devices_out"
+)
+
+# Output unpaired: MAC<TAB>Name
 for mac in "${all_macs[@]}"; do
-  if printf "%s\n" "${paired_macs[@]}" | grep -qx "$mac"; then
+  if [[ -n "${paired_set[$mac]:-}" ]]; then
     continue
   fi
-  # Name lookup (best-effort)
-  name="$(bluetoothctl devices | awk -v m="$mac" '$1=="Device" && $2==m { $1=""; $2=""; sub(/^  /,""); print; exit }')"
-  printf "%s\t%s\n" "$mac" "${name:-}"
+  printf "%s\t%s\n" "$mac" "${name_by_mac[$mac]:-}"
 done
 
 # The result goes via stdout. Each entry is: "<mac><tab><name>",
-# considering the name has no spaces. It serves to be parsed
-# by a tools breaking by tabs and having two entries.
+# considering the name has tabs. It serves to be parsed by a tool
+# breaking by tabs and having two entries.
