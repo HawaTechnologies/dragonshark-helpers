@@ -6,7 +6,7 @@ source /usr/local/lib/dragonshark-bluetooth-utils
 
 ensure_bluetooth_up
 
-mac="$(resolve_device_to_mac "${1:-}" $2)"
+mac="$(resolve_device_to_mac "${1:-}" "${2:-6}")"
 
 # Remove pairing (unpair)
 bluetoothctl remove "$mac"
