@@ -2,11 +2,11 @@
 set -euo pipefail
 source /usr/local/lib/dragonshark-bluetooth-utils
 
-# Args: <device name or mac>
+# Args: <device name or mac> <time>
 
 ensure_bluetooth_up
 
-mac="$(resolve_device_to_mac "${1:-}")"
+mac="$(resolve_device_to_mac "${1:-}" $2)"
 
 # Remove pairing (unpair)
 bluetoothctl remove "$mac"
