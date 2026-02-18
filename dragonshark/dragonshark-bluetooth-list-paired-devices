@@ -14,7 +14,7 @@ bluetoothctl paired-devices | awk '
     name=$0;
     printf "%s\t%s\n", mac, name
   }
-'
+' || true
 
 # The result goes via stdout. Each entry is: "<mac><tab><name>",
 # considering the name has no spaces. It serves to be parsed
