@@ -1,0 +1,79 @@
+#!/usr/bin/env bash
+set -euo pipefail
+source /usr/local/lib/dragonshark-bluetooth-utils
+
+# Config
+: "${DRAGONSHARK_BT_LOOP_SLEEP:=2}"        # seconds between loops
+: "${DRAGONSHARK_BT_CONNECT_TIMEOUT:=6}"   # seconds per connect attempt
+: "${DRAGONSHARK_BT_MAX_JOBS:=16}"          # parallel connect attempts
+
+ensure_bluetooth_up
+
+# Connect attempt for one MAC (idempotent-ish).
+connect_one() {
+  local mac="$1"
+  local deadline=$((SECONDS + DRAGONSHARK_BT_CONNECT_TIMEOUT))
+
+  # Best-effort trust + connect loop for a short time window.
+  while (( SECONDS < deadline )); do
+    local info
+    info="$(bluetoothctl info "$mac" 2>&1 || true)"
+
+    # If already connected, done.
+    if grep -qE 'Connected:\s+yes\b' <<<"$info"; then
+      return 0
+    fi
+
+    # Ensure trusted (ignore failures / already trusted).
+    if ! grep -qE 'Trusted:\s+yes\b' <<<"$info"; then
+      bluetoothctl trust "$mac" >/dev/null 2>&1 || true
+    fi
+
+    # Attempt connect (ignore failures; device may be off).
+    bluetoothctl connect "$mac" >/dev/null 2>&1 || true
+
+    sleep 1
+  done
+
+  # Final check
+  local final
+  final="$(bluetoothctl info "$mac" 2>&1 || true)"
+  grep -qE 'Connected:\s+yes\b' <<<"$final"
+}
+
+# Simple semaphore: wait until number of running jobs < max
+wait_for_slot() {
+  while (( "$(jobs -rp | wc -l)" >= DRAGONSHARK_BT_MAX_JOBS )); do
+    # wait -n exists in bash 4.3+; Ubuntu/RPiOS have it.
+    wait -n || true
+  done
+}
+
+while true; do
+  # 1) Get paired devices list (MAC \t Name \t Connected)
+  paired="$(
+    /usr/local/bin/dragonshark-bluetooth-list-paired-devices 2>/dev/null || true
+  )"
+
+  # Extract MACs where connected == "no"
+  mapfile -t macs < <(
+    awk -F'\t' 'NF>=3 && $3=="no" {print $1}' <<<"$paired" | sort -u
+  )
+
+  # 2) Launch parallel connect attempts
+  pids=()
+  for mac in "${macs[@]}"; do
+    [[ -n "$mac" ]] || continue
+    wait_for_slot
+    ( connect_one "$mac" ) &
+    pids+=("$!")
+  done
+
+  # 3) Wait for all launched attempts this iteration
+  for pid in "${pids[@]}"; do
+    wait "$pid" || true
+  done
+
+  # 4) Loop back
+  sleep "$DRAGONSHARK_BT_LOOP_SLEEP"
+done
