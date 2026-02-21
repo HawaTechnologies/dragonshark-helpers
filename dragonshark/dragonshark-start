@@ -1,5 +1,4 @@
 #!/bin/bash
-
 # Starts the desktop in one of two modes: Debug mode or regular.
 # Debug mode is standard for a linux user. Regular mode starts
 # dragonshark-ui and kills the desktop appliances.
@@ -7,19 +6,42 @@
 # It takes an optional parameter which is a desktop profile.
 # For Raspberry OS, the default user is `pi` and the default
 # profile is LXDE-pi, given by default in this script.
-FLAG="$HOME/.run-in-debug-mode"
-PROFILE="${1:-LXDE-pi}"
-if [ -f "$FLAG" ];
-then
-  # Debug mode: remove flag so next restart is normal
-  rm "$FLAG"
-  killall udiskie 2>/dev/null || true
-  # Wait to keep script alive
-  wait
+set -euo pipefail
+
+FLAG="${HOME}/.run-in-debug-mode"
+PROFILE="${1:-XFCE}"
+
+# Make sure DBus session is available (usually is in XFCE)
+if [ -z "${DBUS_SESSION_BUS_ADDRESS:-}" ]; then
+  echo "WARN: DBUS_SESSION_BUS_ADDRESS is empty"
+fi
+
+# Ensure udiskie is running (if you use it for automount)
+if command -v udiskie >/dev/null 2>&1; then
+  if ! pgrep -u "$USER" -x udiskie >/dev/null 2>&1; then
+    udiskie --no-notify &
+    disown || true
+  fi
+fi
+
+if [ -f "$FLAG" ]; then
+  rm -f "$FLAG"
+
+  # Optional: in debug mode you may want udiskie too; keep it running.
+  # If you *really* want udiskie off in debug mode, uncomment:
+  # pkill -u "$USER" -x udiskie 2>/dev/null || true
 else
-  # Normal mode: kill desktop and launch UI
-  killall lxpanel 2>/dev/null || true
-  killall lxpanel 2>/dev/null || true
-  # Or: pkill -u "$USER" -f 'pcmanfm' 2>/dev/null || true
-  dragonshark-ui
+  # Kill panel + desktop manager (XFCE equivalents of lxpanel/pcmanfm desktop)
+  pkill -u "$USER" -x xfce4-panel 2>/dev/null || true
+  pkill -u "$USER" -x xfdesktop 2>/dev/null || true
+
+  # Some XFCE setups spawn helper wrappers; be a bit more aggressive if needed:
+  pkill -u "$USER" -f 'xfce4-panel' 2>/dev/null || true
+  pkill -u "$USER" -f 'xfdesktop' 2>/dev/null || true
+
+  # Small delay to let them actually go away
+  sleep 0.5
+
+  # Replace with your real binary/command. If it must be foreground, use exec.
+  exec dragonshark-ui
 fi
