@@ -31,6 +31,18 @@ if [ -f "$FLAG" ]; then
   # If you *really* want udiskie off in debug mode, uncomment:
   # pkill -u "$USER" -x udiskie 2>/dev/null || true
 else
+  # Also kill power managers in this mode.
+  pkill -f xfce4-power-manager || true
+  xset s off || true
+  xset s noblank || true
+  xset -dpms || true
+  pkill xscreensaver || true
+  pkill light-locker || true
+  pkill -f xfce4-screensaver || true
+
+  # And force the screen resolution.
+  xrandr --output HDMI-1 --mode 1920x1080
+
   # Kill panel + desktop manager (XFCE equivalents of lxpanel/pcmanfm desktop)
   pkill -u "$USER" -x xfce4-panel 2>/dev/null || true
   pkill -u "$USER" -x xfdesktop 2>/dev/null || true
