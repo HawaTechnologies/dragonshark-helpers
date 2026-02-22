@@ -25,9 +25,15 @@ is_mac() {
 #    return the list of devices here, but prepares them to be
 #    retrieved later.
 scan_for_devices() {
-  bluetoothctl scan on >/dev/null 2>&1 || true
-  sleep "${1:-6}"
-  bluetoothctl scan off >/dev/null 2>&1 || true
+local SCAN_DURATION="${1:-5}"
+(
+  echo "power on"
+  echo "discoverable on"
+  echo "pairable on"
+  echo "scan on"
+  sleep "$SCAN_DURATION"
+  echo "scan off"
+) | bluetoothctl
 }
 
 # 5. Utility to specify a bluetooth device and obtain its MAC.
