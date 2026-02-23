@@ -66,7 +66,7 @@ for mac in "${all_macs[@]}"; do
     continue
   fi
   icon=$(bluetoothctl info "$mac" | grep "Icon:" | awk '{print $2}' || true)
-  if echo "$icon" | grep -Ei "input-.*"; then
+  if (echo "$icon" | grep -Ei "input-.*" > /dev/null); then
     printf "%s\t%s\n" "$mac" "${name_by_mac[$mac]:-}"
   fi
 done
