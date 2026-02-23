@@ -65,7 +65,10 @@ for mac in "${all_macs[@]}"; do
   if [[ -n "${paired_set[$mac]:-}" ]]; then
     continue
   fi
-  printf "%s\t%s\n" "$mac" "${name_by_mac[$mac]:-}"
+  icon=$(bluetoothctl info "$mac" | grep "Icon:" | awk '{print $2}' || true)
+  if echo "$icon" | grep -Ei "input-.*"; then
+    printf "%s\t%s\n" "$mac" "${name_by_mac[$mac]:-}"
+  fi
 done
 
 # The result goes via stdout. Each entry is: "<mac><tab><name>",
