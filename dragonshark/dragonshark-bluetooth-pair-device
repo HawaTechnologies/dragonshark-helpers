@@ -11,7 +11,13 @@ ensure_bluetooth_up
 #    here results in a failure of this command.
 mac="$(resolve_device_to_mac "${1:-}" "${2:-6}")"
 
-# 3. Pair, trust and connect the device.
+# 3. Pair, trust and connect the device. This is done in
+#    an interactive session since bluez in Armbian has some
+#    issues. The store_hint=1 is never set if the commands
+#    are non-interactive, so [LinkKeys] are never stored
+#    and then the pairing is lost when the device is turned
+#    off / disconnected. And a timing of 3 seconds between
+#    commands is also useful here.
 (
   echo "pair $mac"
   sleep 3
