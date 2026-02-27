@@ -12,9 +12,16 @@ ensure_bluetooth_up
 mac="$(resolve_device_to_mac "${1:-}" "${2:-6}")"
 
 # 3. Pair, trust and connect the device.
-bluetoothctl pair "$mac"
-bluetoothctl trust "$mac"
-bluetoothctl connect "$mac"
+(
+  echo "pair $mac"
+  sleep 3
+  echo "trust $mac"
+  sleep 3
+  echo "connect $max"
+) | bluetoothctl
+# bluetoothctl pair "$mac"
+# bluetoothctl trust "$mac"
+# bluetoothctl connect "$mac"
 echo "paired successfully: $mac"
 
 # The result is only the code. No stdout is meaningful.
