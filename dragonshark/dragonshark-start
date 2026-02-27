@@ -41,7 +41,7 @@ else
   pkill -f xfce4-screensaver || true
 
   # And force the screen resolution.
-  xrandr --output HDMI-1 --mode 1920x1080
+  dragonshark-video-fix-resolution
 
   # Kill panel + desktop manager (XFCE equivalents of lxpanel/pcmanfm desktop)
   pkill -u "$USER" -x xfce4-panel 2>/dev/null || true
