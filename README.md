@@ -470,3 +470,13 @@ dragonshark-sound-get-volume
 ```
 
 The result is a single number 0 to 100.
+
+#### dragonshark-video-fix-resolution
+
+Sets the resolution to 1920x1080.
+
+Run it like this:
+
+```shell
+dragonshark-video-fix-resolution
+```
