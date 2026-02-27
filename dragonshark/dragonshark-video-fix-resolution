@@ -1,2 +1,5 @@
 #!/bin/bash
+export DISPLAY=:0
+export XAUTHORITY=/home/YOURUSERNAME/.Xauthority
+sleep ${1:-2}
 xrandr --output HDMI-1 --mode 1920x1080
