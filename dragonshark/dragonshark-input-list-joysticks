@@ -1,3 +1,3 @@
 #!/bin/bash
-ls /dev/input | grep -Ei '^js[0-9]+$'
+ls /dev/input | grep -Ei '^js[0-9]+$' || true
 # The result is a list of lines where each line is like 'js0' or so.
