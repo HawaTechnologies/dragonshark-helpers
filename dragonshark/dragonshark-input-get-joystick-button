@@ -1,0 +1,18 @@
+#!/bin/bash
+if [ "$#" -eq 0 ]
+then
+  echo "A joystick (e.g. js0) is required" 1>&2
+  exit 1
+fi
+
+JOYSTICK=$1
+
+if ! test -e /dev/input/$JOYSTICK || ! (echo "$JOYSTICK" | grep -Ei '^js[0-9]+$')
+then
+  echo "A valid joystick (e.g. js0) is required" 1>&2
+  exit 1
+fi
+
+BUTTON=$(timeout ${2:-6}s jstest --event /dev/input/$JOYSTICK | awk '/^Event: type 1,/{match($0,/number ([0-9]+)/,a); if(a[1]!=""){print a[1]; exit}}')
+echo "${BUTTON:--1}"
+# The output is a number, or -1 if nothing was pressed after some time.

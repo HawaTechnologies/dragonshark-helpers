@@ -413,6 +413,38 @@ dragonshark-bluetooth-connect-device GamePad 10
 
 It's still a success if the device is already trusted and/or already connected.
 
+### Other input commands (based on `joystick` interface)
+
+These commands are meant to capture button presses in a Retroarch-compatible way.
+
+#### dragonshark-input-list-joysticks
+
+Provides a list of file-like devices under /dev/input that match jsN...
+
+Run it like this:
+
+```shell
+dragonshark-input-list-joysticks
+```
+
+The result is a list of lines where each line is the name of the pseudo-file only
+(e.g. `js0`, `js1`, ...).
+
+#### dragonshark-input-get-joystick-button
+
+Captures a button press from a joystick. The result is a single line with a number,
+or -1 if nothing was pressed.
+
+Run it like this:
+
+```shell
+# These two examples are equivalent for js0:
+dragonshark-input-get-joystick-button js0
+dragonshark-input-get-joystick-button js0 6
+# Or to wait a different timeout (e.g. 10 seconds):
+dragonshark-input-get-joystick-button js0 10
+```
+
 ### Experience-related commands
 
 Miscellaneous commands are included here (e.g. to manage the system's sound).
