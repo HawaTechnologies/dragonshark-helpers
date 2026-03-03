@@ -1,0 +1,65 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+CFG="${XDG_CONFIG_HOME:-$HOME/.config}/retroarch/retroarch.cfg"
+
+usage() {
+  echo "Usage: $0 <hotkey> <load> <save> <slot_inc> <slot_dec>"
+  echo "Each value: a number (e.g. 8) or 'nul'"
+  exit 2
+}
+
+[[ $# -eq 5 ]] || usage
+
+HOTKEY="$1"
+LOAD="$2"
+SAVE="$3"
+SLOT_INC="$4"
+SLOT_DEC="$5"
+
+normalize_val() {
+  local v="$1"
+  if [[ "$v" == "nul" || "$v" == "NULL" || "$v" == "null" || -z "$v" ]]; then
+    echo '"nul"'
+  elif [[ "$v" =~ ^[0-9]+$ ]]; then
+    echo "\"$v\""
+  else
+    echo "Error: invalid value '$v' (must be digits or 'nul')" >&2
+    exit 1
+  fi
+}
+
+set_kv() {
+  local key="$1"
+  local val="$2"
+  if grep -q -E "^[[:space:]]*${key}[[:space:]]*=" "$CFG"; then
+    # Replace first occurrence
+    sed -i -E "0,/^[[:space:]]*${key}[[:space:]]*=/s//${key} = ${val}\n#/" "$CFG"
+    # The trick above inserted a marker line "#"; now fix it properly:
+    # We replace the marker line with nothing and keep only one line.
+    # Easier: do a clean sed replacement without marker using a temp file:
+    # (So we’ll do it properly below instead.)
+    :
+  else
+    echo "${key} = ${val}" >> "$CFG"
+  fi
+}
+
+# Proper replace (without fragile marker tricks)
+replace_or_append() {
+  local key="$1"
+  local val="$2"
+
+  if grep -q -E "^[[:space:]]*${key}[[:space:]]*=" "$CFG"; then
+    # Replace ALL occurrences to avoid duplicates drifting over time
+    sed -i -E "s|^[[:space:]]*${key}[[:space:]]*=.*$|${key} = ${val}|g" "$CFG"
+  else
+    echo "${key} = ${val}" >> "$CFG"
+  fi
+}
+
+replace_or_append "input_enable_hotkey_btn"        "$(normalize_val "$HOTKEY")"
+replace_or_append "input_load_state_btn"           "$(normalize_val "$LOAD")"
+replace_or_append "input_save_state_btn"           "$(normalize_val "$SAVE")"
+replace_or_append "input_state_slot_increase_btn"  "$(normalize_val "$SLOT_INC")"
+replace_or_append "input_state_slot_decrease_btn"  "$(normalize_val "$SLOT_DEC")"
