@@ -7,7 +7,7 @@ fi
 
 JOYSTICK=$1
 
-if ! test -e /dev/input/$JOYSTICK || ! (echo "$JOYSTICK" | grep -Ei '^js[0-9]+$')
+if ! test -e /dev/input/$JOYSTICK || ! (echo "$JOYSTICK" | grep -Ei '^js[0-9]+$' > /dev/null)
 then
   echo "A valid joystick (e.g. js0) is required" 1>&2
   exit 1
