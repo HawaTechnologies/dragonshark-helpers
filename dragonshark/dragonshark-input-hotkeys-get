@@ -21,7 +21,8 @@ function get_button() {
 HOTKEY_BUTTON=$(get_button 'input_enable_hotkey_btn')
 LOAD_BUTTON=$(get_button 'input_load_state_btn')
 SAVE_BUTTON=$(get_button 'input_save_state_btn')
-SAVE_SLOT_INCREASE=$(get_button 'input_state_slot_increase_btn')
-SAVE_SLOT_DECREASE=$(get_button 'input_state_slot_decrease_btn')
+SAVE_SLOT_INCREASE_BUTTON=$(get_button 'input_state_slot_increase_btn')
+SAVE_SLOT_DECREASE_BUTTON=$(get_button 'input_state_slot_decrease_btn')
+EXIT_EMULATOR_BUTTON=$(get_button 'input_exit_emulator_btn')
 
-echo "${HOTKEY_BUTTON} ${LOAD_BUTTON} ${SAVE_BUTTON} ${SAVE_SLOT_INCREASE} ${SAVE_SLOT_DECREASE}"
+echo "${HOTKEY_BUTTON} ${LOAD_BUTTON} ${SAVE_BUTTON} ${SAVE_SLOT_INCREASE_BUTTON} ${SAVE_SLOT_DECREASE_BUTTON} ${EXIT_EMULATOR_BUTTON}"
