@@ -13,6 +13,6 @@ then
   exit 1
 fi
 
-BUTTON=$(timeout ${2:-6}s jstest --event /dev/input/$JOYSTICK | awk '/^Event: type 1,/{match($0,/number ([0-9]+)/,a); if(a[1]!=""){print a[1]; exit}}')
+BUTTON=$(timeout ${2:-6}s jstest --event /dev/input/$JOYSTICK | gawk '/^Event: type 1,/{match($0,/number ([0-9]+)/,a); if(a[1]!=""){print a[1]; exit}}')
 echo "${BUTTON:--1}"
 # The output is a number, or -1 if nothing was pressed after some time.
