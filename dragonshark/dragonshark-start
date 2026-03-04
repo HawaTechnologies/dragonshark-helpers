@@ -43,6 +43,10 @@ else
   # And force the screen resolution.
   dragonshark-video-fix-resolution "0"
 
+  # And, yes, unclutter.
+  unclutter -root -idle 1 &
+  local PID=$!
+
   # Kill panel + desktop manager (XFCE equivalents of lxpanel/pcmanfm desktop)
   pkill -u "$USER" -x xfce4-panel 2>/dev/null || true
   pkill -u "$USER" -x xfdesktop 2>/dev/null || true
@@ -56,4 +60,5 @@ else
 
   # Replace with your real binary/command. If it must be foreground, use exec.
   exec dragonshark-ui
+  kill $PID
 fi
