@@ -33,7 +33,7 @@ local SCAN_DURATION="${1:-5}"
   echo "scan on"
   sleep "$SCAN_DURATION"
   echo "scan off"
-) | bluetoothctl
+) | bluetoothctl > /dev/null
 }
 
 # 5. Utility to specify a bluetooth device and obtain its MAC.
