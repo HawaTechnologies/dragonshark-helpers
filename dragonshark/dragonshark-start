@@ -45,7 +45,7 @@ else
 
   # And, yes, unclutter.
   unclutter -root -idle 1 &
-  local PID=$!
+  PID=$!
 
   # Kill panel + desktop manager (XFCE equivalents of lxpanel/pcmanfm desktop)
   pkill -u "$USER" -x xfce4-panel 2>/dev/null || true
