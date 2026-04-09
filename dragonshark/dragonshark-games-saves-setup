@@ -21,4 +21,7 @@ mkdir -p /mnt/SAVES/nes
 mkdir -p /mnt/SAVES/ps1
 mkdir -p /mnt/SAVES/segacd
 mkdir -p /mnt/SAVES/snes
+ls /mnt/saves | greo -Ev 'lost+\found|~tmp' | xargs -I xxx sudo mkdir /mnt/SAVES/xxx/saves
+ls /mnt/saves | greo -Ev 'lost+\found|~tmp' | xargs -I xxx sudo mkdir /mnt/SAVES/xxx/states
+ls /mnt/saves | greo -Ev 'lost+\found|~tmp' | xargs -I xxx sudo chown -R pi:pi /mnt/SAVES/xxx
 mkdir -p /mnt/SAVES/dragonshark
