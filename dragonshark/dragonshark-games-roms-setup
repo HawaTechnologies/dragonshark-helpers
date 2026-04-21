@@ -21,6 +21,7 @@ mkdir -p $1/genesis
 mkdir -p $1/mame
 mkdir -p $1/mastersystem
 mkdir -p $1/n64
+mkdir -p $1/neogeo
 mkdir -p $1/neogeocd
 mkdir -p $1/neogeopocket
 mkdir -p $1/nes
