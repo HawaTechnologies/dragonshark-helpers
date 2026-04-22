@@ -24,5 +24,6 @@ SAVE_BUTTON=$(get_button 'input_save_state_btn')
 SAVE_SLOT_INCREASE_BUTTON=$(get_button 'input_state_slot_increase_btn')
 SAVE_SLOT_DECREASE_BUTTON=$(get_button 'input_state_slot_decrease_btn')
 EXIT_EMULATOR_BUTTON=$(get_button 'input_exit_emulator_btn')
+RESET_BUTTON=$(get_button 'input_reset_btn')
 
-echo "${HOTKEY_BUTTON} ${LOAD_BUTTON} ${SAVE_BUTTON} ${SAVE_SLOT_INCREASE_BUTTON} ${SAVE_SLOT_DECREASE_BUTTON} ${EXIT_EMULATOR_BUTTON}"
+echo "${HOTKEY_BUTTON} ${LOAD_BUTTON} ${SAVE_BUTTON} ${SAVE_SLOT_INCREASE_BUTTON} ${SAVE_SLOT_DECREASE_BUTTON} ${EXIT_EMULATOR_BUTTON} ${RESET_BUTTON}"

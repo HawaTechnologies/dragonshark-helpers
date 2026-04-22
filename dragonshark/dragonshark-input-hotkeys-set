@@ -9,7 +9,7 @@ usage() {
   exit 2
 }
 
-[[ $# -eq 6 ]] || usage
+[[ $# -eq 7 ]] || usage
 
 HOTKEY="$1"
 LOAD="$2"
@@ -17,6 +17,7 @@ SAVE="$3"
 SLOT_INC="$4"
 SLOT_DEC="$5"
 EXIT="$6"
+RESET="$7"
 
 normalize_val() {
   local v="$1"
@@ -65,3 +66,4 @@ replace_or_append "input_save_state_btn"           "$(normalize_val "$SAVE")"
 replace_or_append "input_state_slot_increase_btn"  "$(normalize_val "$SLOT_INC")"
 replace_or_append "input_state_slot_decrease_btn"  "$(normalize_val "$SLOT_DEC")"
 replace_or_append "input_exit_emulator_btn"        "$(normalize_val "$EXIT")"
+replace_or_append "input_reset_btn"                "$(normalize_val "$RESET")"
