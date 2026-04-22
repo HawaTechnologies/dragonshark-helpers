@@ -1,10 +1,17 @@
 #!/bin/bash
 
-# Sets the Master volume
-if [[ "$1" =~ ^[0-9]+$ ]] && [ "$1" -ge 0 ] && [ "$1" -le 100 ]; then
-    amixer set Master "$1"% > /dev/null
-    echo "Volume set to $1%"
-else
-    echo "Invalid volume value. Please specify a number between 0 and 100." 1>&2
+if [ -z "$1" ]; then
+    >&2 echo "Usage: set_volume <0-100>"
     exit 1
 fi
+
+pct=$1
+
+if (( pct < 0 || pct > 100 )); then
+    >&2 echo "Error: value must be between 0 and 100"
+    exit 1
+fi
+
+# Convert to 0.0–1.0
+val=$(awk -v pct=$pct 'BEGIN { printf "%.2f", pct / 100 }')
+wpctl set-volume @DEFAULT_AUDIO_SINK@ "$val"
