@@ -505,10 +505,26 @@ The result is a single number 0 to 100.
 
 #### dragonshark-video-fix-resolution
 
-Sets the resolution to 1920x1080.
+Sets the resolution to 1920x1080. Relies on `dragonshark-video-pick-closest-resolution`.
 
 Run it like this:
 
 ```shell
 dragonshark-video-fix-resolution
 ```
+
+#### dragonshark-video-list-resolutions
+
+Lists te available resolutions, and marks with an asterisk (*) the one currently being used.
+This is related to the HDMI-1 device only (others are ignored silently).
+
+#### dragonshark-video-pick-closest-resolution
+
+Invoked like this: `dragonshark-video-pick-closest-resolution {width} {height}`, it tries the
+following criteria to pick a good resolution (among the ones in device HDMI-1):
+
+1. Picking the exact resolution `{width}x{height}`.
+2. Picking a resolution with same aspect ratio.
+3. Picking a resolution with similar diagonal length (via metric distance).
+
+The resolution is changed to that selected resolution.
