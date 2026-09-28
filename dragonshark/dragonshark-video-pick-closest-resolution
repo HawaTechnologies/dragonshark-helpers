@@ -1,0 +1,178 @@
+#!/usr/bin/env bash
+
+# Usage:
+#   set_resolution 1920 1080
+#   set_resolution 1280 720
+#
+# Selection policy:
+#   1. Exact resolution.
+#   2. Same aspect ratio, closest resolution.
+#   3. Closest aspect ratio + closest resolution.
+#   4. On an effective tie, prefer the larger resolution.
+
+set_resolution() {
+    local target_w="$1"
+    local target_h="$2"
+    local output="HDMI-1"
+
+    if [[ -z "$target_w" || -z "$target_h" ]]; then
+        echo "Usage: set_resolution <width> <height>" >&2
+        return 1
+    fi
+
+    if ! [[ "$target_w" =~ ^[0-9]+$ && "$target_h" =~ ^[0-9]+$ ]]; then
+        echo "Invalid resolution: ${target_w}x${target_h}" >&2
+        return 1
+    fi
+
+    #
+    # Make sure HDMI-1 exists and is connected.
+    #
+    if ! xrandr | grep -q "^${output} connected"; then
+        echo "Output ${output} is not connected." >&2
+        return 1
+    fi
+
+    local best_mode
+
+    best_mode="$(
+        xrandr |
+        awk \
+            -v output="$output" \
+            -v tw="$target_w" \
+            -v th="$target_h" '
+            #
+            # Find the HDMI-1 section.
+            #
+            $1 == output && $2 == "connected" {
+                active = 1
+                next
+            }
+
+            #
+            # Another output begins -> HDMI-1 section ended.
+            #
+            active && /^[^[:space:]]/ {
+                exit
+            }
+
+            #
+            # Resolution lines look like:
+            #
+            #    1920x1080     60.00*+  59.94
+            #
+            active && $1 ~ /^[0-9]+x[0-9]+$/ {
+                mode = $1
+
+                split(mode, dimensions, "x")
+
+                w = dimensions[1] + 0
+                h = dimensions[2] + 0
+
+                #
+                # Exact match always wins.
+                #
+                if (w == tw && h == th) {
+                    print mode
+                    exit
+                }
+
+                #
+                # Aspect ratio comparison without floating-point equality:
+                #
+                #     w / h == tw / th
+                #
+                # iff:
+                #
+                #     w * th == tw * h
+                #
+                same_aspect = (w * th == tw * h)
+
+                #
+                # Relative dimensional error.
+                #
+                # Using relative rather than absolute differences makes
+                # width and height comparable.
+                #
+                dw = (w - tw) / tw
+                dh = (h - th) / th
+
+                size_error = dw * dw + dh * dh
+
+                #
+                # Relative aspect-ratio error.
+                #
+                target_ratio = tw / th
+                ratio = w / h
+
+                ratio_error = ratio / target_ratio - 1
+
+                if (ratio_error < 0)
+                    ratio_error = -ratio_error
+
+                #
+                # Selection category:
+                #
+                #   0 = exact aspect ratio
+                #   1 = different aspect ratio
+                #
+                category = same_aspect ? 0 : 1
+
+                #
+                # Within category 1, strongly favor aspect-ratio
+                # similarity, but still take resolution distance
+                # into account.
+                #
+                if (same_aspect)
+                    score = size_error
+                else
+                    score = ratio_error * 10 + size_error
+
+                area = w * h
+
+                better = 0
+
+                if (!found) {
+                    better = 1
+                } else if (category < best_category) {
+                    better = 1
+                } else if (category == best_category && score < best_score) {
+                    better = 1
+                } else if (category == best_category &&
+                           score == best_score &&
+                           area > best_area) {
+                    better = 1
+                }
+                
+                if (better) {
+                    found = 1
+                    best_mode = mode
+                    best_category = category
+                    best_score = score
+                    best_area = area
+                }
+            }
+
+            END {
+                if (found)
+                    print best_mode
+            }
+        '
+    )"
+
+    if [[ -z "$best_mode" ]]; then
+        echo "No usable modes found for ${output}." >&2
+        return 1
+    fi
+
+    if [[ "$best_mode" == "${target_w}x${target_h}" ]]; then
+        echo "Setting ${output} to ${best_mode}."
+    else
+        echo "Requested ${target_w}x${target_h} is unavailable."
+        echo "Using closest mode: ${best_mode}."
+    fi
+
+    xrandr --output "$output" --mode "$best_mode"
+}
+
+set_resolution "$1" "$2"
