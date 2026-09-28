@@ -1,7 +1,7 @@
 #!/bin/bash
 
 get_resolutions() {
-    local output="${1:-HDMI-1}"
+    local output="${1:-${DRAGONSHARK_VIDEO_OUTPUT:-HDMI-1}}"
 
     xrandr | awk -v output="$output" '
         $1 == output && $2 == "connected" {
