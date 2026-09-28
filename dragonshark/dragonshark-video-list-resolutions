@@ -1,0 +1,30 @@
+#!/bin/bash
+
+get_resolutions() {
+    local output="${1:-HDMI-1}"
+
+    xrandr | awk -v output="$output" '
+        $1 == output && $2 == "connected" {
+            active = 1
+            next
+        }
+
+        active && /^[^[:space:]]/ {
+            exit
+        }
+
+        active && $1 ~ /^[0-9]+x[0-9]+$/ {
+            selected = ""
+
+            for (i = 2; i <= NF; i++) {
+                if ($i ~ /\*/) {
+                    selected = "*"
+                }
+            }
+
+            print $1 selected
+        }
+    '
+}
+
+get_resolutions "$1"
