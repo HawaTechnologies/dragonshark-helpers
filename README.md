@@ -520,11 +520,11 @@ This is related to the HDMI-1 device only (others are ignored silently).
 
 #### dragonshark-video-pick-closest-resolution
 
-Invoked like this: `dragonshark-video-pick-closest-resolution {width} {height}`, it tries the
-following criteria to pick a good resolution (among the ones in device HDMI-1):
+Invoked like this: `dragonshark-video-pick-closest-resolution {width} {height} [output]`, it tries the
+following criteria to pick a good resolution (among the ones in the selected output, defaulting to HDMI-1):
 
 1. Picking the exact resolution `{width}x{height}`.
 2. Picking a resolution with same aspect ratio.
 3. Picking a resolution with similar diagonal length (via metric distance).
 
-The resolution is changed to that selected resolution.
+The command tries candidate resolutions in that order until one is accepted by `xrandr`.
