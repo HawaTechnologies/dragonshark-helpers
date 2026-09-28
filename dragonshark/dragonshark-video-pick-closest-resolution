@@ -73,7 +73,8 @@ set_resolution() {
                 # Exact match always wins.
                 #
                 if (w == tw && h == th) {
-                    print mode
+                    found = 1
+                    best_mode = mode
                     exit
                 }
 
