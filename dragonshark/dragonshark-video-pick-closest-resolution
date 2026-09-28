@@ -3,6 +3,7 @@
 # Usage:
 #   set_resolution 1920 1080
 #   set_resolution 1280 720
+#   set_resolution 2048 1536 eDP-1
 #
 # Selection policy:
 #   1. Exact resolution.
@@ -13,10 +14,10 @@
 set_resolution() {
     local target_w="$1"
     local target_h="$2"
-    local output="HDMI-1"
+    local output="${3:-${DRAGONSHARK_VIDEO_OUTPUT:-HDMI-1}}"
 
     if [[ -z "$target_w" || -z "$target_h" ]]; then
-        echo "Usage: set_resolution <width> <height>" >&2
+        echo "Usage: set_resolution <width> <height> [output]" >&2
         return 1
     fi
 
@@ -26,23 +27,23 @@ set_resolution() {
     fi
 
     #
-    # Make sure HDMI-1 exists and is connected.
+    # Make sure the selected output exists and is connected.
     #
     if ! xrandr | grep -q "^${output} connected"; then
         echo "Output ${output} is not connected." >&2
         return 1
     fi
 
-    local best_mode
+    local candidate_modes
 
-    best_mode="$(
+    candidate_modes="$(
         xrandr |
         awk \
             -v output="$output" \
             -v tw="$target_w" \
             -v th="$target_h" '
             #
-            # Find the HDMI-1 section.
+            # Find the selected output section.
             #
             $1 == output && $2 == "connected" {
                 active = 1
@@ -50,7 +51,7 @@ set_resolution() {
             }
 
             #
-            # Another output begins -> HDMI-1 section ended.
+            # Another output begins -> selected output section ended.
             #
             active && /^[^[:space:]]/ {
                 exit
@@ -68,15 +69,6 @@ set_resolution() {
 
                 w = dimensions[1] + 0
                 h = dimensions[2] + 0
-
-                #
-                # Exact match always wins.
-                #
-                if (w == tw && h == th) {
-                    found = 1
-                    best_mode = mode
-                    exit
-                }
 
                 #
                 # Aspect ratio comparison without floating-point equality:
@@ -114,13 +106,19 @@ set_resolution() {
                 #
                 # Selection category:
                 #
-                #   0 = exact aspect ratio
-                #   1 = different aspect ratio
+                #   0 = exact resolution
+                #   1 = exact aspect ratio
+                #   2 = different aspect ratio
                 #
-                category = same_aspect ? 0 : 1
+                if (w == tw && h == th)
+                    category = 0
+                else if (same_aspect)
+                    category = 1
+                else
+                    category = 2
 
                 #
-                # Within category 1, strongly favor aspect-ratio
+                # Within category 2, strongly favor aspect-ratio
                 # similarity, but still take resolution distance
                 # into account.
                 #
@@ -130,50 +128,41 @@ set_resolution() {
                     score = ratio_error * 10 + size_error
 
                 area = w * h
-
-                better = 0
-
-                if (!found) {
-                    better = 1
-                } else if (category < best_category) {
-                    better = 1
-                } else if (category == best_category && score < best_score) {
-                    better = 1
-                } else if (category == best_category &&
-                           score == best_score &&
-                           area > best_area) {
-                    better = 1
-                }
-                
-                if (better) {
-                    found = 1
-                    best_mode = mode
-                    best_category = category
-                    best_score = score
-                    best_area = area
-                }
+                printf "%d %.12f %d %s\n", category, score, -area, mode
             }
-
-            END {
-                if (found)
-                    print best_mode
-            }
-        '
+        ' |
+        sort -k1,1n -k2,2n -k3,3n |
+        awk '{ print $4 }'
     )"
 
-    if [[ -z "$best_mode" ]]; then
+    if [[ -z "$candidate_modes" ]]; then
         echo "No usable modes found for ${output}." >&2
         return 1
     fi
 
-    if [[ "$best_mode" == "${target_w}x${target_h}" ]]; then
-        echo "Setting ${output} to ${best_mode}."
-    else
-        echo "Requested ${target_w}x${target_h} is unavailable."
-        echo "Using closest mode: ${best_mode}."
-    fi
+    local mode
 
-    xrandr --output "$output" --mode "$best_mode"
+    while IFS= read -r mode; do
+        if [[ -z "$mode" ]]; then
+            continue
+        fi
+
+        if [[ "$mode" == "${target_w}x${target_h}" ]]; then
+            echo "Trying requested mode on ${output}: ${mode}."
+        else
+            echo "Trying fallback mode on ${output}: ${mode}."
+        fi
+
+        if xrandr --output "$output" --mode "$mode"; then
+            echo "Set ${output} to ${mode}."
+            return 0
+        fi
+
+        echo "Mode ${mode} failed, trying the next closest mode." >&2
+    done <<< "$candidate_modes"
+
+    echo "No candidate modes could be applied to ${output}." >&2
+    return 1
 }
 
-set_resolution "$1" "$2"
+set_resolution "$1" "$2" "$3"
